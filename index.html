@@ -16,11 +16,11 @@ Instagram account: <input type="text" id="user" name="" value="{{username}}" pla
 
 Images per zip (default is 50): <input type="number" id="imagesZip" name="" value="{{itemsPerZip}}" placeholder="{{itemsPerZip}}">
 <input type="button" onClick="listar()" value="List Images" name=""/>
-<input type="button" onClick="generarLinks()" value="Generate Links" name=""/>
-<input type="button" onClick="bajar()" value="Download All" name=""/>
+<input type="button" onClick="generarLinks()" value="Generate Links Zips" name=""/>
+<input type="button" onClick="bajar()" value="Download All or Selected" name=""/>
 <div id="status"></div>
 
-<div id="listImage"></div>
+<div id="listImage" data-template="template.html"></div>
 
 </body>
 </html>
