@@ -1,0 +1,9 @@
+<p>Hay {{imagenes.length}} imagenes en esta cuenta.</p>
+<br>
+{{#imagenes}}
+
+	<div class="wrapper">
+		<input type="checkbox" name="check-{{id}}" id="{{id}}"/>
+		<a href="{{urlFull}}" target="_blank"><img src="{{url}}"></a>
+	</div>
+{{/imagenes}}
