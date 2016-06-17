@@ -1,9 +1,16 @@
-<p>Hay {{imagenes.length}} imagenes en esta cuenta.</p>
+<p>There are {{imagenes.length}} images in this account.</p>
+<input type="checkbox" name="check-all-images" id="allImages"/> <label>All Images</label>
+<br>
+{{#urlsZip}}
+	<div class="wrapper-urls">
+		<a href="#" onClick="bajar({{id}})">Since {{since}} until {{until}}</a>
+	</div>
+	<br>
+{{/urlsZip}}
 <br>
 {{#imagenes}}
-
 	<div class="wrapper">
-		<input type="checkbox" name="check-{{id}}" id="{{id}}"/>
+		<input type="checkbox" name="check-{{id}}" id="{{id}}" class="imgSelect" />
 		<a href="{{urlFull}}" target="_blank"><img src="{{url}}"></a>
 	</div>
 {{/imagenes}}

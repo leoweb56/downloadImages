@@ -10,9 +10,16 @@
 	<link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-<input type="text" id="user" name="" value="robaatox" placeholder="user"><input type="button" onClick="bajar()" value="bajar" name=""/>
-<br>
-<input type="button" onClick="listar()" value="listar" name=""/>
+Instagram account: <input type="text" id="user" name="" value="{{username}}" placeholder="{{username}}">
+
+<br><br>
+
+Images per zip (default is 50): <input type="number" id="imagesZip" name="" value="{{itemsPerZip}}" placeholder="{{itemsPerZip}}">
+<input type="button" onClick="listar()" value="List Images" name=""/>
+<input type="button" onClick="generarLinks()" value="Generate Links" name=""/>
+<input type="button" onClick="bajar()" value="Download All" name=""/>
+<div id="status"></div>
+
 <div id="listImage"></div>
 
 </body>

@@ -6,12 +6,18 @@
 // Put your username and some cors proxies here
 //
 var config = {
-  username: 'your_user_here',
-  limit: 50,
+  username: 'robaatox',
+  limit: 500,
+  itemsPerZip: 50,
   proxies: ['url1', 'url2', 'url3']
 };
 
 var images = [];
+var view = {
+        imagenes: [],
+        urlsZip: []
+      };
+
 
 function checkUsername(username) {
   var regex = /^[a-zA-Z0-9._]{1,30}$/;
@@ -48,7 +54,7 @@ function parse(id, funcCallback) {
       var more = json.query.results.json.more_available;
 
       for (i in items)
-        images.push(items[i]['images']);
+        images.push({imageData: items[i]['images'], id: items[i]['id'] });
         //images.push(items[i]['images']['standard_resolution']['url']);
 
       if (more == 'true' && images.length < config.limit)
@@ -95,62 +101,204 @@ function deferredAddZip(url, filename, zip) {
   return deferred;
 }
 
-function createZip() {
+function createZip(imagesToDownload, addToNameFile) {
+  var self = {};
   var zip = new JSZip();
-  var deferreds = new Array();
+  var i = 0;
+  self.deferreds = new Array();
+  self.addToNameFile = esValido(addToNameFile) ? addToNameFile : '';
 
-  $.each(images, function(i, image) {
-    var img = image; //var img = image.substring(7);
-    var url = img.replace('/s640x640',''); //var url = getProxy() + img;
-    var filename = (i + 1) + '.jpg';
+  $.each(imagesToDownload, function(i, image) {
+    var img = image;
+    var url = img.urlFull;
+    var filename = image.id + '.jpg';
 
-    deferreds.push(deferredAddZip(url, filename, zip));
+    self.deferreds.push(deferredAddZip(url, filename, zip));
   });
 
-  $.when.apply($, deferreds).always(function() {
+
+  $.when.apply($, self.deferreds).always(function() {
     var blob = zip.generate({type :'blob'});
 
-    saveAs(blob, config.username + '.zip');
+    saveAs(blob, config.username + self.addToNameFile + '.zip');
 
     images = new Array();
+    $('#status').html("");
   });
+
 }
 
-function bajar(){
-	config.username = $('#user').val();
-	parse(0);
+function bajar(idZip){
+	//config.username = $('#user').val();
+  //if (!esValido(config.username)) { return;}
+
+  $('#status').html("Loading...");
+
+  if (esValido(idZip)) {
+    bajarPorUrl(idZip);
+  }else{
+    if (view.imagenes.length > 0) {
+      if ($('#allImages:checked').length > 0) {
+        createZip(view.imagenes);
+      }else{
+        var imagenesSeleccionadas = [];
+        cargarImagenesSeleccionas(imagenesSeleccionadas);
+        
+        createZip(imagenesSeleccionadas);
+      }
+      
+
+      $('#status').html("");
+
+    }else{
+      parse(0, function(){
+        var noMostrar = false;
+
+        cargarImagenes(view.imagenes);
+
+
+        createZip(view.imagenes);
+
+        $('#status').html("");
+
+      });
+    }
+  }
+  
+  
 }
 
+function bajarPorUrl(idZip){
+  var _imagesToZip = view.urlsZip[idZip].imagesToZip;
+
+  if (_imagesToZip.length > 0) {
+    createZip(_imagesToZip, '_' + idZip);
+  }
+}
 
 //////////////////////////////////////
 // LIST
 // test: robaatox
 ////////////////////////////////////////
+function generarLinks(){
+  $('#status').html("Loading...");
+  config.itemsPerZip = parseInt($('#imagesZip').val());
+  config.username = $('#user').val();
+  if (!esValido(config.username)) {  $('#status').html("Invalid user!"); return;}
+
+  if (view.imagenes.length === 0) {
+    parse(0, function(){
+      cargarImagenes(view.imagenes);
+      generarUrlZip();
+    });
+}
+
+  
+}
+
+function generarUrlZip(){
+  var numImages = config.itemsPerZip;
+  var _since = 0;
+  var _imagesToZip = [];
+  var _idZip = 0;
+  var _iAux = 0;
+
+  $.each(view.imagenes, function(i,imagen){
+    if (numImages <= i) {
+      view.urlsZip.push({
+        id: _idZip,
+        since: _since,
+        until: numImages-1,
+        imagesToZip: $.merge([], _imagesToZip)
+      });
+
+      _idZip++;
+      _since = i;
+      _imagesToZip = [];
+      numImages += config.itemsPerZip;
+    }
+
+    _imagesToZip.push(imagen);
+    _iAux = i;
+  });
+
+  if (_imagesToZip.length > 0) {
+    view.urlsZip.push({
+        id: _idZip,
+        since: _since,
+        until: _iAux,
+        imagesToZip: $.merge([], _imagesToZip)
+      });
+  }
+
+  $.get('template.html', function(template) {
+
+    Mustache.parse(template);   // optional, speeds up future uses
+    var rendered = Mustache.render(template, view);
+    $('#listImage').html(rendered);
+    $('#status').html("");
+
+  });
+}
+
 function listar(){
   config.username = $('#user').val();
-  if (config.username === '' || config.username === null || typeof config.username === 'undefined') { return;}
+  if (!esValido(config.username)) { return;}
+  $('#status').html("Loading...");
+  $('#listImage').html("");
+  images=[];
 
   $.get('template.html', function(template) {
     parse(0, function(){
-      var view = {
-        imagenes: []
+      view = {
+        imagenes: [],
+        urlsZip: []
       };
 
-      for (var i = 0; i<images.length; i++){
-        view.imagenes.push({
-          id: i,
-          url: images[i]["low_resolution"]["url"],
-          urlFull: images[i]["low_resolution"]["url"].replace('s320x320/', '')
-        });
-      }
+      cargarImagenes(view.imagenes);
 
       Mustache.parse(template);   // optional, speeds up future uses
       var rendered = Mustache.render(template, view);
       $('#listImage').html(rendered);
+      $('#status').html("");
     });
 
     
   });
   
 
+}
+
+function cargarImagenes(listDest){
+  for (var i = 0; i<images.length; i++){
+    listDest.push({
+      id: images[i].id,
+      url: images[i].imageData["low_resolution"]["url"],
+      urlFull: images[i].imageData["low_resolution"]["url"].replace('s320x320/', '')
+    });
+  }
+}
+
+function cargarImagenesSeleccionas(listDest){
+
+    $('.imgSelect:checked').each(function(i, elem){
+      listDest.push(view.imagenes.filter(function(e){ return e.id == elem.id; })[0]);
+    })
+
+}
+
+function esValido(text){
+  if (config.username === '' || config.username === null || typeof config.username === 'undefined') { return false;}
+  return true;
+}
+
+function init(){
+  var template = $('body').html();
+  Mustache.parse(template);   // optional, speeds up future uses
+  var rendered = Mustache.render(template, config);
+  $('body').html(rendered);
+}
+
+window.onload = function(){
+  init();
 }
