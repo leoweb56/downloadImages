@@ -9,6 +9,7 @@ var config = {
     username: 'robaatox',
     limit: 500,
     itemsPerZip: 50,
+    lastIdUpdated: null,
     proxies: ['url1', 'url2', 'url3']
 };
 var templateUrl = 'DownloadImages/Template';
@@ -55,9 +56,14 @@ function parse(id, funcCallback) {
             var items = json.query.results.json.items;
             var more = json.query.results.json.more_available;
 
-            for (i in items)
+            for (i in items) {
+                if (esValido(config.lastIdUpdated) && items[i]['id'] === config.lastIdUpdated) {
+                    more = 'false';
+                    break;
+                }
+
                 images.push({ imageData: items[i]['images'], id: items[i]['id'] });
-            //images.push(items[i]['images']['standard_resolution']['url']);
+            }
 
             if (more == 'true' && images.length < config.limit)
                 parse(items[19]['id'], funcCallback);
@@ -135,6 +141,7 @@ function bajar(idZip) {
     //if (!esValido(config.username)) { return;}
 
     $('#status').html("Loading...");
+    config.lastIdUpdated = $('#lastIdUpdated').val();
 
     if (esValido(idZip)) {
         bajarPorUrl(idZip);
@@ -187,6 +194,8 @@ function generarLinks() {
     config.itemsPerZip = parseInt($('#imagesZip').val());
     config.username = $('#user').val();
     if (!esValido(config.username)) { $('#status').html("Invalid user!"); return; }
+
+    config.lastIdUpdated = $('#lastIdUpdated').val();
 
     if (view.imagenes.length === 0) {
         parse(0, function () {
@@ -248,6 +257,7 @@ function generarUrlZip() {
 function listar() {
     config.username = $('#user').val();
     if (!esValido(config.username)) { return; }
+    config.lastIdUpdated = $('#lastIdUpdated').val();
     $('#status').html("Loading...");
     $('#listImage').html("");
     images = [];

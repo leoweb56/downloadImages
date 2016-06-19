@@ -10,17 +10,20 @@
 	<link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-Instagram account: <input type="text" id="user" name="" value="{{username}}" placeholder="{{username}}">
+	Instagram account: <input type="text" id="user" name="" value="{{username}}" placeholder="{{username}}">
 
-<br><br>
+	<br><br>
+	Last Id image download (optional): <input type="text" id="lastIdUpdated" name="" placeholder="optional">
 
-Images per zip (default is 50): <input type="number" id="imagesZip" name="" value="{{itemsPerZip}}" placeholder="{{itemsPerZip}}">
-<input type="button" onClick="listar()" value="List Images" name=""/>
-<input type="button" onClick="generarLinks()" value="Generate Links Zips" name=""/>
-<input type="button" onClick="bajar()" value="Download All or Selected" name=""/>
-<div id="status"></div>
+	<br><br>
 
-<div id="listImage" data-template="template.html"></div>
+	Images per zip (default is 50): <input type="number" id="imagesZip" name="" value="{{itemsPerZip}}" placeholder="{{itemsPerZip}}">
+	<input type="button" onClick="listar()" value="List Images" name=""/>
+	<input type="button" onClick="generarLinks()" value="Generate Links Zips" name=""/>
+	<input type="button" onClick="bajar()" value="Download All or Selected" name=""/>
+	<div id="status"></div>
+
+	<div id="listImage" data-template="template.html"></div>
 
 </body>
 </html>
